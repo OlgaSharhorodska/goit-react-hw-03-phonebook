@@ -21,13 +21,30 @@ export class App extends Component {
   formSubmitHandler = formState => {
     const contactId = nanoid(5);
     formState.id = contactId;
-    if (this.state.contacts.find(({ name }) => formState.name === name)) {
+    if (
+      this.state.contacts.find(
+        ({ name }) => formState.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
       alert(`${formState.name} is already in contacts`);
       return;
     }
     this.setState(prevState => {
       return { contacts: [...prevState.contacts, formState] };
     });
+  };
+
+  componentDidMount = () => {
+    const contactsFromLS = JSON.parse(localStorage.getItem('contacts')) || [];
+    this.setState({
+      contacts: contactsFromLS,
+    });
+  };
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
   };
 
   changeInput = input => {
@@ -47,9 +64,8 @@ export class App extends Component {
 
   findContact = () => {
     const filterContact = this.state.contacts.filter(({ name }) => {
-      return name.toLowerCase().includes(this.state.filter.toLowerCase());
+      return name.includes(this.state.filter);
     });
-    console.log(filterContact);
     return filterContact;
   };
 
